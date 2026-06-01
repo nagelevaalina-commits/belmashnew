@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Белмаш — Целевая модель управления TO-BE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16213e;--paper:#f8f5ef;--gold:#b5813a;--teal:#2e6b7a;--plum:#6b3a5a;--sage:#3d6b4a;--slate:#4a5a6e;--muted:#7a7060;--border:rgba(22,33,62,.1);--w:#fff}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Jost',sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden}
+.hero{min-height:100vh;background:var(--ink);position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 40px;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 70% at 50% 30%,#1e2d5a,var(--ink) 65%)}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(181,129,58,.15) 1px,transparent 1px);background-size:40px 40px}
+.hero-c{position:relative;z-index:2;max-width:960px}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(181,129,58,.35);padding:8px 24px;margin-bottom:44px}
+.hero-badge span{font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--gold)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(50px,8vw,104px);font-weight:700;line-height:.95;color:var(--paper);margin-bottom:28px;letter-spacing:-2px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{font-size:15px;font-weight:300;color:rgba(248,245,239,.5);line-height:1.9;max-width:560px;margin:0 auto 52px}
+.stats{display:flex;justify-content:center;border:1px solid rgba(181,129,58,.2)}
+.stat{padding:22px 44px;border-right:1px solid rgba(181,129,58,.2);text-align:center}
+.stat:last-child{border-right:none}
+.stat .n{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700;color:var(--gold);line-height:1;display:block}
+.stat .l{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(248,245,239,.4);margin-top:5px;display:block}
+nav{position:sticky;top:0;z-index:999;background:rgba(22,33,62,.97);backdrop-filter:blur(16px);border-bottom:1px solid rgba(181,129,58,.15)}
+.nav-w{max-width:1400px;margin:0 auto;padding:0 32px;display:flex;align-items:center;overflow-x:auto;scrollbar-width:none}
+.nav-w::-webkit-scrollbar{display:none}
+.nb{border:none;background:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(248,245,239,.4);padding:18px 20px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s}
+.nb:hover,.nb.on{color:var(--gold);border-bottom-color:var(--gold)}
+.sec{display:none}.sec.on{display:block}
+.wrap{max-width:1320px;margin:0 auto;padding:80px 40px}
+.sh{margin-bottom:56px}
+.sh-eye{font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.sh-title{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,4vw,56px);font-weight:700;line-height:1.05;color:var(--ink);margin-bottom:16px}
+.sh-desc{font-size:15px;color:var(--muted);line-height:1.85;max-width:700px;font-weight:300}
+.hdiv{border:none;border-top:1px solid var(--border);margin:64px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.card{background:var(--w);padding:38px;position:relative;overflow:hidden}
+.card .bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.card .bar.t{background:var(--teal)}
+.card .cn{font-family:'Cormorant Garamond',serif;font-size:76px;font-weight:700;color:rgba(22,33,62,.05);line-height:1;margin-bottom:-16px}
+.card h3{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:12px;line-height:1.3}
+.card p{font-size:13.5px;color:var(--muted);line-height:1.85}
+.bilayer{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:44px}
+.bil-d{background:var(--ink);padding:40px}
+.bil-l{background:var(--w);padding:40px;border:1px solid var(--border);border-left:none}
+.bil-t{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:22px}
+.bil-d .bil-t{color:var(--gold)}.bil-l .bil-t{color:var(--teal)}
+.bi{display:flex;gap:11px;margin-bottom:13px}
+.bd{width:5px;height:5px;border-radius:50%;margin-top:8px;flex-shrink:0}
+.bil-d .bd{background:var(--gold)}.bil-l .bd{background:var(--teal)}
+.bi p{font-size:13.5px;line-height:1.75}
+.bil-d .bi p{color:rgba(248,245,239,.72)}.bil-l .bi p{color:var(--muted)}
+
+/* ORG CHART */
+.org-wrap{overflow-x:auto;padding-bottom:16px}
+.org-tree{min-width:1100px;font-family:'Jost',sans-serif}
+.org-gd{text-align:center;margin-bottom:0}
+.gd-box{display:inline-block;background:var(--ink);color:var(--paper);padding:18px 52px;position:relative}
+.gd-box::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:var(--ink)}
+.gd-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;display:block}
+.gd-sub{font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-top:4px;display:block}
+.trunk{width:1px;height:28px;background:var(--border);margin:0 auto}
+.hrow{position:relative;display:flex;gap:0}
+.hrow::before{content:'';position:absolute;top:0;left:3.5%;right:3.5%;height:1px;background:var(--border)}
+.org-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:0}
+.vl{width:1px;height:20px;background:var(--border)}
+.bc{width:calc(100% - 6px);max-width:155px;cursor:pointer;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.bc:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.13)}
+.bc-head{padding:11px 12px;text-align:center}
+.bc-t{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;line-height:1.3;color:#fff}
+.bc-s{font-size:9px;font-weight:500;margin-top:2px;opacity:.85;color:#fff}
+.bc-body{padding:8px 10px}
+.bc-body li{font-size:9px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);list-style:none;line-height:1.3}
+.bc-body li:last-child{border:none}
+.chr .bc-head{background:#7a4a3a}.chr{border:1px solid #7a4a3a;background:#fdf4f2}
+.cdev .bc-head{background:#2e6b7a}.cdev{border:1px solid #2e6b7a;background:#eef6f8}
+.cten .bc-head{background:#5a3a8a}.cten{border:1px solid #5a3a8a;background:#f3eefa}
+.cecom .bc-head{background:#b5813a}.cecom{border:1px solid #b5813a;background:#fdf6ea}
+.copt .bc-head{background:#6b3a5a}.copt{border:1px solid #6b3a5a;background:#fdf2f8}
+.cops .bc-head{background:#3d6b4a}.cops{border:1px solid #3d6b4a;background:#f0f7f2}
+.cfin .bc-head{background:#4a5a6e}.cfin{border:1px solid #4a5a6e;background:#f0f2f6}
+
+/* ECOM detail tree */
+.ecom-tree{margin-top:8px;width:100%;max-width:360px}
+.sub-line{width:1px;height:14px;background:var(--border);margin:0 auto}
+.sub-row{display:flex;gap:4px;position:relative;justify-content:center}
+.sub-row::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:var(--border)}
+.sub-col{flex:1;display:flex;flex-direction:column;align-items:center}
+.sub-vl{width:1px;height:12px;background:var(--border)}
+.sub-box{width:calc(100% - 4px);max-width:105px;border:1px solid var(--border);background:var(--w);padding:6px 8px;text-align:center}
+.sub-box .st{font-size:8.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.sub-box .ss{font-size:8px;color:var(--muted)}
+
+/* ROLES */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px}
+.fb{border:1px solid var(--border);cursor:pointer;font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;background:var(--w);color:var(--muted);transition:all .15s}
+.fb:hover,.fb.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fb.on.fecom{background:#b5813a;border-color:#b5813a}.fb.on.fopt{background:#6b3a5a;border-color:#6b3a5a}
+.fb.on.fdev{background:#2e6b7a;border-color:#2e6b7a}.fb.on.fops{background:#3d6b4a;border-color:#3d6b4a}
+.fb.on.ffin{background:#4a5a6e;border-color:#4a5a6e}.fb.on.fhr{background:#7a4a3a;border-color:#7a4a3a}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:2px}
+.rc{background:var(--w);display:none;flex-direction:column;overflow:hidden}
+.rc.vis{display:flex}
+.rc-top{padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.rt{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.rs{font-size:11px;color:var(--muted);margin-top:3px}
+.rbadge{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;white-space:nowrap;flex-shrink:0}
+.be{background:#fdf0d8;color:#7a5010}.bo{background:#f8ecf5;color:#4a1838}
+.bdev{background:#e8f4f8;color:#1a4852}.bop{background:#ebf5ee;color:#1a3d22}
+.bf{background:#eceef5;color:#1e2d4a}.bh{background:#f8ecea;color:#4a1e10}
+.rc-body{padding:0 20px 20px;flex:1;display:flex;flex-direction:column;gap:12px}
+.rf label{display:block;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.rf p{font-size:13px;color:var(--muted);line-height:1.8}
+.rdv{height:1px;background:var(--border)}
+
+/* COMMITTEES */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.cc{background:var(--w);overflow:hidden}
+.cc-head{padding:28px 32px;color:var(--paper)}
+.cc-head h2{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:700;margin-bottom:7px}
+.cc-head .cs{font-size:10px;letter-spacing:2px;text-transform:uppercase;opacity:.7}
+.che{background:#b5813a}.cha{background:#2e6b7a}.cho{background:#4a5a6e}.chb{background:#8a7a5a}
+.cc-body{padding:26px 32px}
+.cs-block{margin-bottom:20px}
+.cs-block h4{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.cmb{display:flex;flex-wrap:wrap;gap:5px}
+.cmm{font-size:12px;background:var(--paper);border:1px solid var(--border);padding:5px 11px;color:var(--ink);font-weight:500}
+.cmet{background:var(--paper);border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:8px}
+.cmet .ml{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.cmet .md{font-size:12.5px;color:var(--muted);line-height:1.75}
+.clist{list-style:none}
+.clist li{font-size:12.5px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.clist li:last-child{border:none}.clist li::before{content:"\2192  ";color:var(--gold)}
+.cbonus{background:var(--ink);color:var(--paper);padding:18px 20px;margin-top:14px;display:flex;align-items:center;gap:14px}
+.cbonus .bp{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;color:var(--gold);white-space:nowrap;line-height:1}
+.cbonus p{font-size:12.5px;color:rgba(248,245,239,.7);line-height:1.7}
+
+/* CADENCE */
+.cad-w{margin-bottom:48px}
+.cad-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border)}
+.cad-col{padding:28px;border-right:1px solid var(--border)}
+.cad-col:last-child{border-right:none}
+.cad-freq{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--gold);margin-bottom:5px;line-height:1}
+.cad-name{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:14px;line-height:1.4}
+.cad-list{list-style:none}
+.cad-list li{font-size:12.5px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.cad-list li:last-child{border:none}.cad-list li::before{content:"\2014 ";color:var(--gold)}
+.rep-section h3{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:20px}
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px;margin-bottom:40px}
+.repcard{background:var(--w);padding:28px}
+.repcard .rh{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.repcard .rw{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.ritem{display:flex;gap:9px;margin-bottom:9px}
+.rdot{width:3px;border-radius:2px;background:var(--teal);flex-shrink:0;min-height:16px}
+.ritem p{font-size:12.5px;color:var(--muted);line-height:1.7}
+.comm-rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px}
+.crcard{background:var(--w);padding:24px}
+.crcard .crh{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.crcard .crw{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.crcard .md{font-size:12.5px;color:var(--muted);line-height:1.75}
+
+@media(max-width:900px){.g2,.cg,.bilayer{grid-template-columns:1fr}.cad-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.wrap{padding:48px 18px}.cad-row{grid-template-columns:1fr}.rg{grid-template-columns:1fr}.stats{flex-wrap:wrap}.stat{padding:14px 22px}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+<div class="hero-dots"></div>
+<div class="hero-c">
+  <div class="hero-badge"><span>Белмаш &nbsp;&middot;&nbsp; TO-BE &nbsp;&middot;&nbsp; Целевая модель управления</span></div>
+  <h1>Архитектура<br>управления<br><em>нового уровня</em></h1>
+  <p class="hero-sub">Полное описание целевой модели: 7 функциональных групп, 4 управленческих комитета, все роли с ЦКП и функционалами, система регулярного менеджмента</p>
+  <div class="stats">
+    <div class="stat"><span class="n">10</span><span class="l">Прямых отчётов ГД</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">Комитета</span></div>
+    <div class="stat"><span class="n">52</span><span class="l">Роли</span></div>
+    <div class="stat"><span class="n">2</span><span class="l">Слоя управл.</span></div>
+  </div>
+</div>
+</section>
+
+<nav>
+<div class="nav-w">
+  <button class="nb on" onclick="show('logic')">Логика модели</button>
+  <button class="nb" onclick="show('structure')">Оргструктура</button>
+  <button class="nb" onclick="show('roles')">Роли и ЦКП</button>
+  <button class="nb" onclick="show('committees')">Комитеты</button>
+  <button class="nb" onclick="show('cadence')">Регулярный менеджмент</button>
+</div>
+</nav>
+
+<!-- LOGIC -->
+<div id="s-logic" class="sec on">
+<div class="wrap">
+  <div class="sh">
+    <div class="sh-eye">01 &mdash; Логика модели</div>
+    <h2 class="sh-title">Почему именно такая архитектура</h2>
+    <p class="sh-desc">Изменение системы мотивации потребовало пересмотра самой структуры управления: корректная мотивация невозможна без чёткого распределения ролей, ЦКП и зон ответственности.</p>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="bar"></div><div class="cn">01</div><h3>Ключевая проблема AS-IS</h3><p>Нет единого центра ответственности за результат. Коммерческие каналы жили по разной логике управления. Премирование заменялось выполнением задач. Роли описывались через перечень действий, а не через конечный продукт. Входящий поток оседал стихийно &mdash; без квалификации и маршрутизации. После ухода одного руководителя среднего звена вскрылся информационный вакуум.</p></div>
+    <div class="card"><div class="bar t"></div><div class="cn">02</div><h3>Принцип TO-BE</h3><p>Каждая роль &mdash; один ЦКП. У каждого канала &mdash; свой владелец. Продающие и сопровождающие функции разведены. Входящий поток маршрутизируется по типу клиента. Мотивация привязана к результату, а не к активности. Управленческие роли &mdash; только там, где есть реальный управленческий масштаб.</p></div>
+    <div class="card"><div class="bar t"></div><div class="cn">03</div><h3>Запрос на плоскую модель</h3><p>Максимум 2 уровня иерархии. Все руководители функциональных групп отчитываются ГД напрямую ежемесячно по единому шаблону: план / факт / что мешает / что нужно. Ни один промежуточный уровень не фильтрует информацию между группами и ГД. Прямая видимость без потерь.</p></div>
+    <div class="card"><div class="bar"></div><div class="cn">04</div><h3>Решение: два слоя управления</h3><p>Слой 1 &mdash; функциональные группы с прямым подчинением ГД, индивидуальными ЦКП и 80% мотивации от результата своей группы. Слой 2 &mdash; четыре комитета для решений на стыке групп: командный показатель + 20% командного бонуса. Комитет не уровень иерархии &mdash; это периодическая рабочая группа.</p></div>
+  </div>
+  <div class="bilayer">
+    <div class="bil-d">
+      <div class="bil-t">Слой 1 &mdash; Оргструктура</div>
+      <div class="bi"><div class="bd"></div><p>Подчинение, власть, деньги &mdash; только через этот слой</p></div>
+      <div class="bi"><div class="bd"></div><p>7 функциональных групп напрямую к ГД без промежуточных уровней</p></div>
+      <div class="bi"><div class="bd"></div><p>Ежемесячные письменные отчёты каждого руководителя</p></div>
+      <div class="bi"><div class="bd"></div><p>80% мотивации руководителя &mdash; от результата его функциональной группы</p></div>
+      <div class="bi"><div class="bd"></div><p>Каждая роль имеет ЦКП &mdash; конечный продукт, а не набор действий</p></div>
+    </div>
+    <div class="bil-l">
+      <div class="bil-t">Слой 2 &mdash; Комитеты</div>
+      <div class="bi"><div class="bd"></div><p>Периодические встречи для решений на стыке нескольких групп</p></div>
+      <div class="bi"><div class="bd"></div><p>Комитет не управляет постоянно &mdash; собрались, решили, разошлись</p></div>
+      <div class="bi"><div class="bd"></div><p>4 комитета: коммерческий, ассортиментный, операционный, бюджетный</p></div>
+      <div class="bi"><div class="bd"></div><p>У каждого &mdash; один сквозной показатель, недостижимый в одиночку</p></div>
+      <div class="bi"><div class="bd"></div><p>20% мотивации &mdash; командный бонус от результата комитета</p></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- STRUCTURE -->
+<div id="s-structure" class="sec">
+<div class="wrap">
+  <div class="sh">
+    <div class="sh-eye">02 &mdash; Оргструктура</div>
+    <h2 class="sh-title">Целевая схема TO-BE</h2>
+    <p class="sh-desc">10 прямых подчинённых ГД. Коммерческий контур разделён на три самостоятельных канала. Под каждым руководителем — полная вертикаль подчинения.</p>
+  </div>
+
+  <div style="overflow-x:auto;padding-bottom:24px;margin-bottom:48px">
+  <div style="min-width:1560px;font-family:'Jost',sans-serif">
+
+  <!-- GD -->
+  <div style="text-align:center">
+    <div style="display:inline-block;background:#16213e;color:#f8f5ef;padding:16px 56px">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;display:block">Генеральный директор</span>
+      <span style="font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#b5813a;margin-top:4px;display:block">10 прямых подчинённых &mdash; отчёты ежемесячно</span>
+    </div>
+  </div>
+  <div style="width:1px;height:24px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+  <div style="position:relative;height:1px;background:rgba(22,33,62,.15);margin:0 0.5%"></div>
+
+  <!-- TOP ROW -->
+  <div style="display:flex;gap:5px;align-items:flex-start">
+
+    <!-- 1. HR / PERSONNEL -->
+    <div style="flex:1.3;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #7a4a8a;background:#f5f0fb;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('hr')">
+        <div style="background:#7a4a8a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Зам. ГД по работе с персоналом</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Юрист</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Эйчар-менеджер</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">HR-специалист</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Спец. по охране труда и ТБ</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Специалист по АХО</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Офис-менеджер</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Уборщица</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DEVELOPMENT -->
+    <div style="flex:1.7;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #c0507a;background:#fdf0f5;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('dev')">
+        <div style="background:#c0507a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Зам. ГД по развитию бизнеса</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8px;font-weight:700;color:#c0507a;padding:3px 0 2px;border-bottom:1px solid rgba(192,80,122,.2)">Отдел развития продукции</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0 2px 6px;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Рук. отд. развит., модерниз. и кач.</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0 2px 14px;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">&rarr; Менеджер отдела развития</div>
+          <div style="font-size:8px;font-weight:700;color:#c0507a;padding:4px 0 2px;border-bottom:1px solid rgba(192,80,122,.2)">Продвижение</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Брендинговое агентство</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Дизайнер</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по соц. медиа</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Рук. гр. по кач. продукции (сам.)</div>
+          <div style="font-size:8px;font-weight:700;color:#c0507a;padding:4px 0 2px;border-bottom:1px solid rgba(192,80,122,.2)">Клиентский сервис</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Рук. клиентского сервиса</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0 2px 14px;line-height:1.3">&rarr; Менеджер клиентского сервиса</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. TENDER — ВАКАНСИЯ -->
+    <div style="flex:.9;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #a0a060;background:#f8f8e8;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('ten')">
+        <div style="background:#a0a060;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">РОП тендерного отдела (B2G)</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.8);margin-top:3px">— ВАКАНСИЯ —</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Менеджер по тендерам</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. E-COM -->
+    <div style="flex:1.4;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <!-- РОП E-com -->
+      <div style="border:1.5px solid #c8a840;background:#fdf8e8;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('ecom')">
+        <div style="background:#c8a840;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">РОП E-com</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Лидоруб</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по продажам B2B</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по маркетплейсам</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Менеджер по маркетплейсам</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. OPT -->
+    <div style="flex:1.6;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #c8a840;background:#fdf8e8;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('opt')">
+        <div style="background:#c8a840;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">РОП (дилеры, дистрибьюторы)</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по продажам ПФО</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по продажам ЦФО</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по продажам ЮФО/СКФО</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">КАМ (ключевые клиенты)</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по сопровождению</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по сопровождению</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Менеджер по сопровождению</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PROCUREMENT -->
+    <div style="flex:1.1;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #7a5a9a;background:#f5f0fc;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('proc')">
+        <div style="background:#7a5a9a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Рук. по закупкам и ВЭД</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Спец. по таможенному оформлению</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер по ВЭД</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Менеджер по закупкам</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. SERVICE -->
+    <div style="flex:1.2;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #5a8a6a;background:#eef7f1;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('srv')">
+        <div style="background:#5a8a6a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Рук. сервисного обслуживания</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Ведущий инженер</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Спец. серв. обслуживания</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Мастер-приёмщик</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Тех. редактор / Сопр. продукта</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Инженер по диагностике обор.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. WAREHOUSE -->
+    <div style="flex:1.3;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #5a8a6a;background:#eef7f1;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('wh')">
+        <div style="background:#5a8a6a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Рук. складского хранения и логистики</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Менеджер склада и логистики</div>
+        </div>
+      </div>
+      <div style="width:1px;height:14px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #5a8a6a;background:#eef7f1;overflow:hidden">
+        <div style="background:#6a9a7a;padding:8px 10px;text-align:center">
+          <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3">Рук. гр. складских операций</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Кладовщики &times;2</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Грузчики &times;5</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Водители &times;3</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Водитель-грузчик</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Разнорабочий</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. IT -->
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #5a8a6a;background:#eef7f1;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('it')">
+        <div style="background:#5a8a6a;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Руководитель IT</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Системный администратор</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Программист 1С</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. FINANCE -->
+    <div style="flex:1.1;display:flex;flex-direction:column">
+      <div style="width:1px;height:20px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #4a7aaa;background:#eef2f8;overflow:hidden;cursor:pointer" onclick="show('roles');scrollToGroup('fin')">
+        <div style="background:#4a7aaa;padding:10px;text-align:center">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3;letter-spacing:.3px">Зам. ГД по финансам и экономике</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Спец. по ценообразованию</div>
+        </div>
+      </div>
+      <div style="width:1px;height:14px;background:rgba(22,33,62,.15);margin:0 auto"></div>
+      <div style="border:1.5px solid #4a7aaa;background:#eef2f8;overflow:hidden">
+        <div style="background:#5a8aba;padding:8px 10px;text-align:center">
+          <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.3">Главный бухгалтер</div>
+        </div>
+        <div style="padding:7px 9px">
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;border-bottom:1px solid rgba(22,33,62,.08);line-height:1.3">Бухгалтер</div>
+          <div style="font-size:8.5px;color:#7a7060;padding:2px 0;line-height:1.3">Бухгалтер</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end top row -->
+
+  <!-- COMMITTEES BAR -->
+  <div style="margin-top:32px;padding-top:18px;border-top:2px dashed rgba(181,129,58,.3)">
+    <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#b5813a;text-align:center;margin-bottom:12px">Второй слой управления &mdash; комитеты (не иерархия, а координация)</div>
+    <div style="display:flex;gap:6px">
+      <div style="flex:1;background:rgba(46,107,122,.08);border:1px solid rgba(46,107,122,.25);padding:11px 14px;text-align:center">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#1a4852">Ассортиментный комитет</div>
+        <div style="font-size:8px;color:#7a7060;margin-top:3px">1&times; в месяц</div>
+      </div>
+      <div style="flex:1;background:rgba(181,129,58,.08);border:1px solid rgba(181,129,58,.25);padding:11px 14px;text-align:center">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#7a5010">Коммерческий комитет</div>
+        <div style="font-size:8px;color:#7a7060;margin-top:3px">2&times; в месяц</div>
+      </div>
+      <div style="flex:1;background:rgba(61,107,74,.08);border:1px solid rgba(61,107,74,.25);padding:11px 14px;text-align:center">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#1a3d22">Операционный комитет</div>
+        <div style="font-size:8px;color:#7a7060;margin-top:3px">2&times; в месяц</div>
+      </div>
+      <div style="flex:1;background:rgba(74,90,110,.08);border:1px solid rgba(74,90,110,.25);padding:11px 14px;text-align:center">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#1e2d4a">Финансовый комитет</div>
+        <div style="font-size:8px;color:#7a7060;margin-top:3px">1&times; в месяц</div>
+      </div>
+    </div>
+  </div>
+
+  </div></div><!-- end min-width / overflow -->
+
+  <div class="hdiv"></div>
+  <div class="sh"><div class="sh-eye">Ключевые решения</div><h2 class="sh-title">Что принципиально изменилось</h2></div>
+  <div class="g2">
+    <div class="card"><div class="bar"></div><div class="cn">E</div>
+      <h3>E-com &mdash; самостоятельный коммерческий контур</h3>
+      <p>РОП E-com прямо к ГД. Лидоруб квалифицирует весь входящий поток: B2C и малый B2B остаются в e-com, B2B с перепродажей &mdash; передаётся в опт по региону с заполненной карточкой. Менеджер e-com получает бонус от первых двух сделок переданного клиента в опте &mdash; конфликт интересов снят.</p>
+    </div>
+    <div class="card"><div class="bar t"></div><div class="cn">3</div>
+      <h3>Три коммерческих канала &mdash; прямо к ГД, координация через комитет</h3>
+      <p>РОП E-com, РОП дилеры/дистрибьюторы и РОП тендерного отдела подчиняются ГД напрямую и независимо. Каждый отвечает за свой канал и свой ЦКП. Координация между каналами — через коммерческий комитет: единая ценовая политика, регламент передачи B2B-лидов из e-com в опт, синхронизация планов. 80% мотивации каждого РОП — от результата своего канала. 20% — командный бонус за общий коммерческий план.</p>
+    </div>
+    <div class="card"><div class="bar t"></div><div class="cn">O</div>
+      <h3>Три операционные группы &mdash; прямо к ГД</h3>
+      <p>Сервис, склад и IT без промежуточного операционного директора. Координация &mdash; через операционный комитет и еженедельный дашборд сквозного SLA. У каждой группы чёткий ЦКП и совместный финансовый показатель.</p>
+    </div>
+    <div class="card"><div class="bar"></div><div class="cn">2</div>
+      <h3>Два слоя управления</h3>
+      <p>Оргструктура: 10 прямых отчётов ГД с вертикалью подчинения и ЦКП. 80% мотивации от результата своей группы. Комитеты: координация на стыке групп, командный показатель и 20% командного бонуса.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="s-roles" class="sec">
+<div class="wrap">
+  <div class="sh">
+    <div class="sh-eye">03 &mdash; Роли и ЦКП</div>
+    <h2 class="sh-title">Функциональные группы, ЦКП и роли</h2>
+    <p class="sh-desc">Каждая группа имеет ЦКП — конечный результат перед ГД. Внутри каждой группы — ЦКП и функционал каждой роли.</p>
+  </div>
+
+<div class="grp-block" id="grp-hr">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #7a4a8a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#7a4a8a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(122,74,138,.06)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#7a4a8a;margin-bottom:6px">Функциональная группа 1</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">HR и административный блок</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Укомплектованная, адаптированная и юридически защищённая команда, работающая в комфортной и безопасной среде — кадровая и административная база для запуска и работы всей TO-BE модели</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Зам. ГД по работе с персоналом → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Заместитель ГД по работе с персоналом</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Укомплектованная оргструктура, в которой закрыты все критичные вакансии, каждый новый сотрудник проходит качественную адаптацию, в команде поддерживается управляемый кадровый климат, а трудовые отношения оформлены без правовых рисков</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Планирование потребности в персонале по TO-BE структуре на горизонте квартала и года · разработка и контроль системы адаптации для каждого уровня · формирование кадрового резерва под ключевые роли · разработка описаний должностей, грейдов и вилок · участие во внедрении и сопровождении системы мотивации · регулярный мониторинг удовлетворённости и вовлечённости · кадровое делопроизводство и контроль корректности документов · организация охраны труда и ТБ · административно-хозяйственное обеспечение офиса</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Юрист</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">HR</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Отсутствие правовых рисков в трудовых отношениях, корректно оформленная кадровая и договорная документация, защищённые интересы компании при трудовых спорах</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Подготовка и проверка трудовых договоров, допсоглашений, должностных инструкций · юридические консультации по вопросам трудового права · сопровождение трудовых споров и претензий от сотрудников · взаимодействие с трудовой инспекцией и другими контролирующими органами · проверка кадровых приказов и документов на соответствие законодательству · оценка правовых рисков при организационных изменениях</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">HR-специалист</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">HR</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Своевременно закрытые вакансии и корректно оформленный кадровый документооборот без ошибок и задержек</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Первичный скрининг резюме и телефонные интервью · организация и координация собеседований между кандидатами и руководителями · ведение кадрового делопроизводства: приём, перевод, увольнение, отпуска · подготовка кадровых приказов и личных дел · ведение табелей учёта рабочего времени · отчётность по открытым вакансиям и воронке подбора · работа с базами кандидатов и HR-системами</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Специалист по охране труда и ТБ</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">HR</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Отсутствие производственных инцидентов и нарушений норм охраны труда, пройденные проверки без предписаний</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка и актуализация инструкций по охране труда и ТБ · проведение вводных и периодических инструктажей · организация обучения и проверки знаний по ОТ · расследование несчастных случаев и опасных ситуаций · ведение журналов и документации по ОТ · подготовка к проверкам трудовой инспекции · контроль соблюдения норм безопасности на рабочих местах</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Специалист по АХО</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">АХО</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Обеспеченный всем необходимым офис и помещения без административных сбоев и перебоев в снабжении</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Организация закупки офисных принадлежностей, расходных материалов и хозяйственного инвентаря · контроль состояния помещений и организация текущего ремонта через подрядчиков · управление договорами на обслуживание (уборка, охрана, связь, интернет) · ведение реестра имущества и основных средств · обработка заявок от сотрудников по хозяйственным вопросам · контроль работы уборщицы</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Офис-менеджер</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">АХО</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Организованный рабочий офис, где сотрудники и гости обслуживаются быстро и корректно, а административные вопросы решаются без эскалаций</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём входящих звонков и гостей, маршрутизация запросов · организация командировок: билеты, гостиницы, трансфер · работа с входящей и исходящей корреспонденцией · поддержание порядка на ресепшн и в переговорных · помощь в организации корпоративных мероприятий · закупка воды, кофе, чая и прочих офисных расходников · административная поддержка руководителей</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Уборщица</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по персоналу (через Спец. АХО)</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#ede8f9;color:#3a1a6a;white-space:nowrap;flex-shrink:0">АХО</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Чистые и ухоженные рабочие помещения, создающие комфортные условия для работы</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Ежедневная влажная уборка офисных помещений, переговорных, коридоров и санузлов · мытьё окон и протирка поверхностей по графику · вынос мусора и смена пакетов · пополнение расходников в санузлах · уборка после мероприятий и приёмов · соблюдение графика уборки и санитарных норм</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-dev">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #c0507a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#c0507a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(192,80,122,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#c0507a;margin-bottom:6px">Функциональная группа 2</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Развитие бизнеса</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Продуктовый и маркетинговый контур, обеспечивающий коммерческие каналы качественным продуктом, трафиком, контентом и маркетинговыми материалами, а клиентов — профессиональным постпродажным сопровождением</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Зам. ГД по развитию бизнеса → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Заместитель ГД по развитию бизнеса</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Функциональный куратор e-com</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Продуктовый и маркетинговый контур, который обеспечивает коммерческие каналы качественным продуктом, трафиком, контентом и маркетинговыми материалами — группа создаёт условия для роста продаж, а не продаёт напрямую</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управление всем блоком развития: продукт, маркетинг, клиентский сервис · приоритизация проектов и ресурсов внутри группы · увязка разработки новых продуктов с коммерческими задачами обоих каналов продаж · функциональное кураторство над e-com без административного подчинения: задачи менеджерам e-com ставятся только через РОП e-com · ведение ассортиментного комитета: подготовка повестки, модерация, фиксация решений · управление внешним подрядчиком — брендинговым агентством Гадзюк</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель отдела развития, модернизации и качества продукции</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по развитию</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Развитие</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Продукты, подготовленные к продаже: с подтверждёнными техническими характеристиками, полной документацией и прошедшие полный цикл валидации в согласованные сроки</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём, первичная оценка и анализ образцов новых и модернизируемых продуктов · формирование требований к продукту совместно с коммерцией — что нужно рынку · координация доработок и модернизации с поставщиками · приоритизация доработок по критичности и срокам · взаимодействие с маркетингом по описаниям, контенту и материалам · взаимодействие с сервисом по типичным неисправностям и гарантийным случаям · взаимодействие с закупками по срокам и объёмам запуска · контроль прохождения продукта через полный цикл: образец → валидация → документация → запуск · ведение продуктового цикла и реестра продуктов</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер отдела развития, модернизации и качества продукции</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. отдела развития</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Развитие</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Своевременно собранный, структурированный и переданный пакет продуктовой информации, необходимый для запуска, доработки или согласования продукта</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Сбор и систематизация данных по продукту: характеристики, сертификаты, фото, описания · координация подготовки актов сверки, испытаний и технических заключений · ведение реестра статусов продуктовых проектов — что в работе, что ждёт, что заблокировано · контроль сроков получения документов от поставщиков и смежников · коммуникация с отделами развития, маркетинга, закупок и сервиса по продуктовым задачам · подготовка материалов для ассортиментного комитета: что готово к запуску, что нет и почему</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Дизайнер</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по развитию</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Продвижение</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Актуальные, корректные и пригодные к немедленному использованию визуальные материалы для всех каналов — от карточек на маркетплейсах до презентаций для партнёров</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Вёрстка и дизайн карточек товаров для маркетплейсов и интернет-магазина · оформление коммерческих предложений, презентаций и pitch-deck · подготовка баннеров, сторис и визуальных материалов для SMM · контроль соответствия всех материалов бренд-буку · актуализация контента при изменении ассортимента или условий · оперативные дизайн-задачи по запросам от продаж и маркетинга · взаимодействие с брендинговым агентством по крупным проектам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по социальным медиа</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по развитию</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Продвижение</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Регулярно обновляемые и растущие социальные каналы компании с вовлечённой аудиторией, которые формируют узнаваемость бренда и входящий интерес</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка ежемесячного контент-плана с учётом коммерческих приоритетов · создание и публикация контента по расписанию: посты, сторис, рилсы · модерация комментариев и личных сообщений, ответы подписчикам · взаимодействие с аудиторией: конкурсы, опросы, обсуждения · аналитика эффективности: охваты, вовлечённость, прирост · тестирование новых форматов и подходов · оперативный ситуативный контент по актуальным инфоповодам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Брендинговое агентство</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Внешний подрядчик · Управление через Зам. ГД по развитию</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Продвижение</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Актуальная, последовательная и профессиональная визуальная и коммуникационная идентичность компании, которая работает на всех носителях</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка и поддержка визуальной идентичности: логотип, цвета, типографика, бренд-бук · создание коммуникационных концепций и слоганов · дизайн упаковки и этикеток продуктов · разработка презентационных и маркетинговых материалов для ключевых событий · брендирование точек продаж и выставочных материалов · оперативный дизайн по согласованным задачам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Digital-специалист</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по развитию · Трафик · Аналитика · SEO</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Продвижение</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый входящий трафик из цифровых каналов с понятной стоимостью лида (CPL) и растущей конверсией — коммерческие каналы обеспечены качественным потоком обращений</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Настройка и ведение рекламных кампаний: контекст (Яндекс.Директ), таргет (ВКонтакте, myTarget) · управление бюджетами по каналам трафика: распределение, оптимизация, отключение неэффективного · SEO-продвижение сайта и интернет-магазина: техническая и контентная оптимизация · сквозная аналитика: настройка Яндекс.Метрики, коллтрекинга, воронки от клика до сделки · еженедельная отчётность по трафику: количество лидов, CPL, конверсия по каналам · A/B-тестирование посадочных страниц и объявлений · взаимодействие с менеджерами e-com по качеству входящего трафика · передача ресурсов e-com по запросу через Зам. ГД по развитию</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель клиентского сервиса</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по развитию · Работает в паре с менеджером клиентского сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Клиентский сервис</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый и стандартизированный постпродажный клиентский сервис, в котором все обращения обрабатываются в срок, претензии закрываются без эскалаций, а уровень лояльности клиентов растёт</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Выстраивание и стандартизация процессов обработки клиентских обращений и претензий · формирование и контроль SLA по всем типам обращений · управление менеджером клиентского сервиса: постановка задач, контроль, разбор сложных кейсов · анализ причин обращений и претензий — передача системных проблем в сервис и продукт · ведение базы знаний: типовые вопросы, ответы, регламенты · мониторинг NPS и уровня удовлетворённости клиентов · участие в формировании стандартов коммуникации с клиентами</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf0f5">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер отдела клиентского сервиса</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. клиентского сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fde8f0;color:#5a1a3a;white-space:nowrap;flex-shrink:0">Клиентский сервис</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждое клиентское обращение обработано в срок, с правильным ответом и без повторного контакта по той же проблеме</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём и первичная обработка клиентских обращений по всем каналам: телефон, почта, мессенджеры · регистрация обращений в системе учёта, присвоение приоритета · работа с претензиями и рекламациями: выяснение обстоятельств, координация с сервисом и складом · информирование клиента о статусе обращения на каждом этапе · эскалация нестандартных кейсов руководителю · пополнение базы знаний: фиксация типовых вопросов и решений · сбор обратной связи по закрытым обращениям</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-ten">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #7a5a9a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#7a5a9a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(122,90,154,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#7a5a9a;margin-bottom:6px">Функциональная группа 3</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Тендерный отдел (B2G)</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Системный и прибыльный тендерный канал продаж: управляемый pipeline, высокая конверсия в выигранные контракты, каждый контракт исполняется в срок и с плановой маржинальностью</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">РОП тендерного отдела — ВАКАНСИЯ → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f2fc">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">РОП тендерного отдела (B2G)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · ВАКАНСИЯ</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eeebf8;color:#2a1058;white-space:nowrap;flex-shrink:0">Рук. группы (ВАКАНСИЯ)</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Системный тендерный канал с управляемым pipeline активных заявок, растущей конверсией в выигранные контракты и контролируемой маржинальностью каждой сделки</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Формирование и управление pipeline тендерных заявок · отбор и оценка целесообразности участия в каждом тендере по критериям маржинальности, риска и компетенций · контроль подготовки и своевременной подачи пакетов документов · управление исполнением выигранных контрактов: сроки, объёмы, качество, документы · взаимодействие со всеми подразделениями для получения необходимых данных (ценообразование, склад, сервис) · ведение и обновление базы тендеров и платформ · ежеквартальная отчётность ГД: pipeline, результаты, маржинальность, прогноз</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f5f2fc">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по тендерам</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП тендерного отдела</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eeebf8;color:#2a1058;white-space:nowrap;flex-shrink:0">Тендер</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Корректно подготовленный и поданный в срок комплект тендерной документации без технических ошибок и отклонений</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Ежедневный мониторинг тендерных площадок (ЕИС, Сбербанк АСТ и др.) · первичный анализ тендеров: требования, сроки, ограничения · подготовка комплекта заявочных документов: технические, коммерческие, юридические · запрос необходимых данных у смежных подразделений · отслеживание хода тендерных процедур и сроков · занесение данных о тендерах в базу учёта · сопровождение выигранных контрактов: уведомления, документооборот, контроль сроков</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-ecom">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #b5813a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#b5813a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(181,129,58,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#b5813a;margin-bottom:6px">Функциональная группа 4</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">E-commerce</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Управляемый e-commerce канал — интернет-магазин и маркетплейсы — с прозрачной воронкой, работающей маршрутизацией входящего потока и системным ростом продаж</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">РОП E-com → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf8ea">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">РОП E-com</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Интернет-продажи + Маркетплейсы</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fdf0d8;color:#7a5010;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый e-commerce канал с прозрачной воронкой, правильной маршрутизацией входящего потока и стабильным ростом продаж по всем цифровым точкам входа</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управление командой: постановка индивидуальных и командных планов, контроль их выполнения · контроль конверсии воронки на каждом этапе: лид → квалификация → сделка → повторная покупка · организация системы первичной квалификации через лидоруба: правила, скрипты, метрики · обеспечение корректной маршрутизации B2B-лидов с перепродажей в опт по регламенту · ценовая политика в цифровом канале: акции, промо, ценовые матрицы по площадкам · взаимодействие с Зам. ГД по развитию по трафику, контенту и продуктовым материалам · участие в коммерческом комитете: синхронизация планов с оптом, разбор конфликтов по клиентской базе</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf8ea">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Лидоруб (менеджер входящего потока)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП E-com</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fdf0d8;color:#7a5010;white-space:nowrap;flex-shrink:0">E-com</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждый входящий лид квалифицирован за 2–3 минуты и направлен в правильный канал — без потерь на входе и без попадания клиента в неподходящий контур</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём и обработка ВСЕХ входящих обращений с сайта, мессенджеров и цифровых каналов в режиме реального времени · быстрая квалификация по типу клиента: физлицо / юрлицо, для себя / для перепродажи, объём · B2C и малый B2B (для собственного потребления) → передача менеджеру по продажам e-com · B2B с признаком перепродажи → немедленная передача в опт по закреплённому региону с заполненной карточкой в CRM · фиксация источника каждого лида и результата маршрутизации · не ведёт продажи — только квалифицирует, обогащает карточку и передаёт · ведение ежедневной отчётности: количество лидов, распределение по типам, потери</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf8ea">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по продажам B2B (интернет-магазин)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП E-com</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fdf0d8;color:#7a5010;white-space:nowrap;flex-shrink:0">E-com</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Новый активированный B2B-клиент из интернет-магазина с первой оплаченной сделкой и потенциалом для регулярных закупок</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Принятие и отработка B2B-лидов из интернет-магазина, переданных лидорубом · первичные переговоры: выявление потребности, объёма, условий закупки · подготовка и согласование коммерческих предложений · доведение клиента до первой оплаченной сделки · после активации — передача клиента на регулярное сопровождение внутри e-com или в опт при росте объёма · ведение карточек клиентов в CRM: история, статусы, договорённости · участие в разработке скриптов и сценариев продаж B2B из онлайна</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf8ea">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по маркетплейсам ×2</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП E-com · WB, Ozon, Яндекс Маркет</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#fdf0d8;color:#7a5010;white-space:nowrap;flex-shrink:0">E-com</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Актуальные продающие карточки и стабильные растущие продажи на маркетплейсах при управляемых рекламных расходах</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Ведение и оптимизация карточек товаров: контент, фото, характеристики, SEO-заполнение · планирование, запуск и управление рекламными кампаниями: ставки, бюджеты, ACOS/CPO · участие в акциях и промо площадок: оценка целесообразности, подготовка, контроль · конкурентный анализ: цены, карточки, позиции конкурентов · мониторинг и управление остатками на складах площадок (out-of-stock → уведомление закупок) · работа с отзывами: ответы, анализ причин негативных · аналитика и еженедельная отчётность: выручка, конверсия, CTR, ACOS по каждой площадке</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-opt">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #6b3a5a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#6b3a5a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(107,58,90,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#6b3a5a;margin-bottom:6px">Функциональная группа 5</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Опт / B2B</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Управляемый B2B-партнёрский канал: работающая региональная база, чёткая схема получения лидов от e-com, прозрачная коммерческая политика и контролируемая дебиторская задолженность</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">РОП (дилеры, дистрибьюторы) → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">РОП (дилеры, дистрибьюторы)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · B2B / Дилеры · Дистрибьюторы</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый B2B-партнёрский канал с работающей и развивающейся клиентской базой, прозрачной коммерческой политикой и контролируемой дебиторской задолженностью</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка, согласование и контроль исполнения единой коммерческой политики по всем регионам · управление командой региональных менеджеров и менеджеров по сопровождению: планы, приоритеты, разбор кейсов · квартальное и месячное планирование по каналам и регионам · ведение и развитие клиентской базы: активация новых, удержание действующих, возврат потерянных · ключевые переговоры с крупными партнёрами и сетями · контроль и работа с дебиторской задолженностью · координация с e-com по регламенту передачи B2B-лидов: обеспечение правильной работы схемы · участие в коммерческом комитете</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по продажам ПФО</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП · Приволжский федеральный округ</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Опт B2B</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Растущий и управляемый клиентский портфель в ПФО: действующие партнёры развиваются, новые подключаются, дебиторка под контролем</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Развитие действующей клиентской базы в регионе: расширение ассортимента, рост объёмов · активный поиск и подключение новых клиентов с рыночным потенциалом · проведение переговоров, презентаций и защиты коммерческих условий · приём тёплых B2B-лидов от лидоруба e-com по своему региону с заполненной карточкой · передача операционного сопровождения менеджерам по сопровождению · мониторинг и контроль дебиторской задолженности по своему портфелю · регулярные визиты и звонки к ключевым клиентам региона</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по продажам ЦФО</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП · Центральный федеральный округ</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Опт B2B</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Растущий и управляемый клиентский портфель в ЦФО: действующие партнёры развиваются, новые подключаются, дебиторка под контролем</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Развитие действующей клиентской базы в регионе: расширение ассортимента, рост объёмов · активный поиск и подключение новых клиентов · проведение переговоров и защиты коммерческих условий · приём тёплых B2B-лидов от лидоруба e-com · передача операционного сопровождения менеджерам по сопровождению · контроль дебиторки по портфелю · регулярные визиты к ключевым клиентам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по продажам ЮФО / СКФО</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП · Южный и Северо-Кавказский округа</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Опт B2B</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Растущий и управляемый клиентский портфель в ЮФО/СКФО: действующие партнёры развиваются, новые подключаются, дебиторка под контролем</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Развитие действующей клиентской базы · поиск и подключение новых клиентов · переговоры и коммерческие условия · приём B2B-лидов от лидоруба e-com · передача сопровождения менеджерам · контроль дебиторки · регулярный контакт с партнёрами</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">КАМ (менеджер по работе с ключевыми клиентами)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП · Ключевые клиенты и сети</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Опт B2B</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Ключевые клиенты выполняют плановые показатели по ассортименту, обороту и коммерческим условиям; отношения стабильны и развиваются</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Стратегические переговоры с ключевыми клиентами и торговыми сетями · согласование и расширение ассортиментных матриц · разработка и согласование индивидуальных коммерческих условий (ИКУ, бонусы, ретро) · регулярный мониторинг выполнения планов по ключевым клиентам · анализ доли ассортимента и разработка плана по её расширению · мониторинг и контроль дебиторки ключевого портфеля · взаимодействие с закупками и сервисом по вопросам ключевых клиентов</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#fdf5fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджеры по сопровождению ×3</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение РОП · Развитие и сопровождение действующей базы</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#f8ecf5;color:#4a1838;white-space:nowrap;flex-shrink:0">Опт B2B</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Действующие клиенты совершают регулярные заказы, расширяют ассортимент и не требуют постоянного внимания региональных менеджеров</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Регулярный контакт с действующими клиентами: звонки, письма, уточнение планов закупок · приём и оформление повторных заказов · расширение ассортимента у партнёров: проактивные предложения новинок и смежных категорий · контроль регулярности размещения заказов, реакция на паузы · решение текущих вопросов клиентов: статус заказа, документы, рекламации · координация со складом, сервисом и бухгалтерией по текущим сделкам · ведение CRM: обновление статусов, фиксация договорённостей</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-proc">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #5a4a8a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#5a4a8a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(90,74,138,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#5a4a8a;margin-bottom:6px">Функциональная группа 6</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Закупки и ВЭД</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Управляемый контур закупок и ВЭД: нужный товар в нужном количестве поступает в срок по контролируемой себестоимости — без дефицита по ключевым позициям и без избыточных запасов</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Руководитель по закупкам и ВЭД → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f3f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель по закупкам и ВЭД</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Закупки · ВЭД · Таможня</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eae8f8;color:#2a1a5a;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый контур закупок и ВЭД: нужный товар в нужном количестве поступает в срок по контролируемой себестоимости — без дефицита по ключевым SKU и без излишних запасов</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка и исполнение стратегии закупок: горизонт планирования, страховые запасы, ABC-анализ · формирование и контроль бюджета закупок · управление и развитие базы поставщиков: переговоры, условия, альтернативы · организация и контроль ВЭД-поставок от заказа до получения товара на склад · контроль таможенного оформления: сроки, корректность деклараций, платежи · оптимизация маршрутов и условий доставки для снижения логистических издержек · управление командой: специалист по таможне, менеджер ВЭД, менеджер по закупкам · участие в ассортиментном комитете: данные о наличии, сроках, себестоимости</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f3f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Специалист по таможенному оформлению</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. по закупкам и ВЭД</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eae8f8;color:#2a1a5a;white-space:nowrap;flex-shrink:0">Таможня</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждая ввозимая поставка оформлена без ошибок, в минимально возможные сроки, с корректными таможенными платежами и без штрафов</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Подготовка и подача таможенных деклараций на все ввозимые товары · определение и проверка кодов ТН ВЭД для каждой позиции · расчёт таможенных пошлин, НДС и сборов · подготовка пакета документов для таможенного оформления: контракт, инвойс, упаковочные листы, сертификаты · взаимодействие с таможенными брокерами и органами · мониторинг изменений таможенного законодательства · контроль сроков выпуска товаров и оперативное реагирование на запросы таможни · ведение архива таможенных документов</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f3f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по ВЭД</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. по закупкам и ВЭД</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eae8f8;color:#2a1a5a;white-space:nowrap;flex-shrink:0">ВЭД</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Международные поставки исполнены в срок, в полном объёме, с корректной документацией и в рамках согласованной себестоимости</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Подготовка и согласование внешнеэкономических контрактов с зарубежными поставщиками · переговоры с поставщиками по условиям, срокам, объёмам и ценам · координация международных поставок от заказа до прихода на склад · подготовка и контроль комплекта ВЭД-документов: контракт, инвойс, упаковочный лист, сертификаты происхождения · взаимодействие с экспедиторами, брокерами и перевозчиками · контроль соответствия поставленного товара спецификации и качеству · ведение платёжного графика и контроль оплат по контрактам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f3f0fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер по закупкам</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. по закупкам и ВЭД</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#eae8f8;color:#2a1a5a;white-space:nowrap;flex-shrink:0">Закупки</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Заказы поставщикам размещены своевременно и исполнены в срок — склад обеспечен товаром без дефицита и без избыточных остатков</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Мониторинг складских остатков и формирование потребности в закупках на основе данных продаж · размещение заказов у поставщиков согласно плану закупок и страховым запасам · контроль исполнения заказов: сроки, объёмы, качество поставки · документооборот по закупкам: счета, накладные, акты · оперативное взаимодействие со складом по срокам приёмки и расхождениям · работа с поставщиками по отклонениям: задержки, недостачи, пересортица · ведение базы поставщиков: контакты, условия, история закупок</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-srv">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #3d6b4a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#3d6b4a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(61,107,74,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d6b4a;margin-bottom:6px">Функциональная группа 7</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Сервисное обслуживание</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Управляемый постпродажный сервис: гарантийные случаи и обращения закрываются в срок и без эскалаций; технические данные о дефектах передаются в продукт; новые продукты проходят испытания до запуска</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Руководитель сервисного обслуживания → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель сервисного обслуживания</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Гарантия · Ремонт · АСЦ</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемый постпродажный сервис: все гарантийные случаи и сервисные обращения закрываются в срок и без эскалаций, клиент получает исправный товар или решение своей проблемы</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управление командой отдела сервиса: постановка задач, контроль, разбор сложных кейсов · разработка и актуализация стандартов сервисного обслуживания, регламентов и SLA · формирование и контроль бюджета отдела · взаимодействие с закупками по запчастям и расходным материалам · контроль качества ремонта и технической корректности выдачи · работа с авторизованными сервисными центрами (АСЦ): условия, объёмы, качество · передача системных данных о дефектах в отдел развития продукции · участие в операционном комитете</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Ведущий инженер</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Сервис</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Сложные сервисные кейсы диагностированы и решены технически корректно, причины типовых поломок выявлены и переданы в продукт</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Диагностика и ремонт сложных технических неисправностей, которые специалисты не могут решить самостоятельно · анализ причин системных поломок: поиск корневой причины, а не симптома · формирование технических рекомендаций по улучшению продукта на основе данных сервиса · инженерная поддержка и обучение специалистов сервиса · участие в приёмке и оценке новых продуктов с точки зрения ремонтопригодности · взаимодействие с отделом развития продукции по техническим дефектам</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Специалист отдела сервисного обслуживания</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Сервис</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждое сервисное обращение зарегистрировано, сопровождено документами, обработано в SLA и закрыто без повторного контакта по той же проблеме</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём и регистрация заявок на гарантийный и платный ремонт · консультация клиентов по вопросам сервиса и гарантийных условий · подготовка и выставление счетов на платный ремонт · оформление гарантийных актов и отчётности для поставщиков · организация отгрузки и получения запчастей · коммуникация с клиентами по статусу их обращения · ведение журнала обращений и контроль соблюдения SLA</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Мастер-приёмщик</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Сервис</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждая единица оборудования принята с корректно оформленными документами, зафиксированным состоянием и без потери информации о дефекте</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приёмка оборудования от клиентов: визуальный осмотр, проверка комплектности · фиксация описания дефекта со слов клиента и по результатам осмотра · оформление приёмного акта с полным описанием состояния · организация движения оборудования внутри сервисного отдела · контроль соблюдения очерёдности и сроков ремонта · выдача оборудования клиенту: проверка, подпись, объяснение выполненных работ</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Технический редактор / Специалист по сопровождению продукта</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. сервиса · Линейная роль</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Тех. документация</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Актуальная, единообразная и технически корректная документация по всему продуктовому ассортименту, обеспечивающая продажи, сервис и клиентов необходимой технической информацией</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка и актуализация технических описаний продуктов: характеристики, схемы, инструкции по эксплуатации · технический редактирование контента карточек товаров для сайта и маркетплейсов: корректность, единообразие, полнота · подготовка технической документации для гарантийных случаев и сервиса · взаимодействие с инженером по диагностике по актуализации технических данных · взаимодействие с отделом развития продукции: получение новых технических данных, обновление документации · ведение архива технической документации: актуальные версии, история изменений · подготовка технических материалов для обучения сотрудников сервиса и продаж</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Инженер по диагностике оборудования</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. сервиса</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Диагностика</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Каждый новый или модернизируемый продукт проверен, испытан и получил техническое заключение до запуска в продажу</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приём образцов новых и модернизированных продуктов от отдела развития · проведение технических испытаний и функциональных проверок · составление акта сверки заявленных и фактических характеристик · выявление технических рисков, несоответствий и потенциальных дефектов · подготовка технического заключения с рекомендациями по запуску или доработке · взаимодействие с техническим редактором по актуализации документации · взаимодействие с ведущим инженером по сложным техническим вопросам</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-wh">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #3d6b4a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#3d6b4a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(61,107,74,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d6b4a;margin-bottom:6px">Функциональная группа 8</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Складское хранение и логистика</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Складской и логистический контур, в котором все заказы комплектуются без ошибок и доставляются в срок — физическое исполнение обещания компании клиенту</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Руководитель складского хранения и логистики → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель складского хранения и логистики</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Склад · Логистика</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Складской и логистический контур, в котором все заказы комплектуются без ошибок и отгружаются в согласованные сроки — физическое исполнение обещания компании клиенту</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Организация работы склада: зонирование, адресное хранение, WMS · планирование и маршрутизация отгрузок: приоритеты, сроки, транспорт · управление Руководителем группы складских операций и линейным персоналом · контроль качества операций: ошибки комплектации, повреждения, сроки · взаимодействие с транспортными компаниями: условия, тарифы, надёжность · контроль потерь и недостач ТМЦ: инвентаризации, разбор расхождений · участие в операционном комитете · обеспечение соответствия склада требованиям охраны труда и пожарной безопасности</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Менеджер склада и логистики</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. склада</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Склад</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Корректно оформленный и проведённый полный комплект документов по каждой отгрузке без ошибок и задержек</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Подготовка комплекта отгрузочных документов: товарные накладные, УПД, счета-фактуры, CMR · работа с транспортными компаниями: заявки, отслеживание, контроль исполнения · ведение ЭДО: подписание и отправка документов контрагентам · контроль оплат за транспортные услуги · мониторинг статусов доставки и оперативное уведомление при проблемах · хранение и архивирование отгрузочной документации</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель группы складских и логистических операций</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. склада · Управляет линейным персоналом</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Склад</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Сменная работа склада выполнена в полном объёме, в срок и без ошибок комплектации</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Составление и постановка сменных задач персоналу с учётом объёма и приоритетов · контроль выполнения смены: скорость, точность, соблюдение стандартов · организация приёмки товара: проверка количества, качества, соответствия документам · организация размещения товара по адресному хранению · организация сборки и комплектации заказов перед отгрузкой · обеспечение дисциплины, безопасности и порядка на складе · оперативное устранение сбоев и нештатных ситуаций внутри смены</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Кладовщики ×2</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. группы складских операций</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Склад</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Точный складской учёт: каждая единица товара корректно оприходована, размещена по адресу и находит по запросу без потерь</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Приёмка товара: подсчёт, проверка на соответствие накладным, фиксация расхождений · размещение товара по адресам хранения согласно схеме склада · ведение учёта остатков в WMS или 1С · участие в плановых и внеплановых инвентаризациях · контроль условий хранения и сроков годности · маркировка и переоценка товара по заданию руководителя</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Грузчики ×5 · Водитель-грузчик</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. группы складских операций</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Склад</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Грузы перемещены, погружены и выгружены без повреждений, в срок и в полном соответствии с заданием</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Погрузка и разгрузка транспортных средств · перемещение товара внутри склада: стеллажи, зоны приёмки, отгрузки · упаковка и маркировка заказов перед отгрузкой · работа с ТСД при сборке заказов · работа на погрузчике и другой складской технике (водитель-грузчик) · соблюдение правил охраны труда при работе с грузами</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Разнорабочий</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. группы складских операций</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Склад</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Вспомогательные складские работы выполнены своевременно и обеспечивают бесперебойную работу основных процессов</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Вспомогательные складские работы по заданию руководителя · поддержание чистоты и порядка в складских зонах · утилизация упаковочного материала и мусора · помощь при погрузке и разгрузке · прочие задачи по обеспечению работы склада</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Водители ×3</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. группы складских операций</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Логистика</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Грузы доставлены клиентам и партнёрам в срок, в сохранности и с корректно оформленными документами</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Доставка товаров клиентам по согласованным маршрутам · приём и сдача товара по документам: накладные, акты, подписи · контроль сохранности груза в процессе транспортировки · оперативная связь с диспетчером и клиентом при изменении ситуации · соблюдение ПДД и режима труда и отдыха водителей · своевременная передача закрывающих документов · поддержание технического состояния закреплённого транспортного средства</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-it">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #3d6b4a;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#3d6b4a"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(61,107,74,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d6b4a;margin-bottom:6px">Функциональная группа 9</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">IT</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Стабильно работающие IT-системы без критичных сбоев и реализованные в срок проекты автоматизации — инфраструктурная основа для работы всей компании</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Руководитель IT → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Руководитель IT</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Инфраструктура · 1С · Автоматизация</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Доступные и стабильно работающие IT-системы без критичных сбоев и реализованные в срок проекты автоматизации бизнес-процессов, которые снижают ручной труд и повышают скорость работы компании</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управление IT-функцией: приоритизация задач по ценности для бизнеса · поддержка и развитие 1С: функциональность, данные, отчёты · управление IT-инфраструктурой: сети, серверы, рабочие места, доступы · выявление процессов, подлежащих автоматизации, и реализация проектов · управление командой: системный администратор, программист 1С · контроль информационной безопасности и резервного копирования · участие в операционном комитете: обеспечение бесперебойности систем как часть сквозного SLA</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Системный администратор</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. IT</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">IT</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Исправно работающая пользовательская и серверная инфраструктура: все сотрудники имеют доступ к нужным системам, инциденты закрываются в SLA</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Поддержка пользователей: приём заявок, диагностика, устранение проблем · управление корпоративной сетью: настройка, мониторинг, безопасность · администрирование серверов и виртуальных машин · управление учётными записями, доступами и правами · обслуживание компьютеров, принтеров и другого оборудования · организация резервного копирования данных · мониторинг состояния систем и превентивное устранение рисков</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f9f3">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Программист 1С</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Рук. IT</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8f5ec;color:#1a3d22;white-space:nowrap;flex-shrink:0">IT</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Рабочие и корректно реализованные доработки 1С, которые закрывают бизнес-задачи в срок и без критичных ошибок после внедрения</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Разработка и доработка конфигурации 1С под бизнес-процессы компании · создание интеграций 1С с внешними системами: маркетплейсы, сайт, CRM · разработка отчётов и аналитических форм для менеджмента · исправление ошибок и устранение инцидентов в 1С · тестирование доработок перед выпуском в продакшн · документирование изменений конфигурации · консультирование пользователей по работе в 1С</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="grp-block" id="grp-fin">
+  <div style="display:flex;align-items:stretch;gap:0;border:1.5px solid #4a7aaa;margin-bottom:2px">
+    <div style="width:6px;flex-shrink:0;background:#4a7aaa"></div>
+    <div style="flex:1;padding:24px 28px;background:rgba(74,122,170,.05)">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a7aaa;margin-bottom:6px">Функциональная группа 10</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:10px">Финансы и экономика</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">ЦКП функциональной группы</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;max-width:800px">Управляемая финансовая система: ГД видит достоверную экономику компании в любой момент, бюджет всех групп под контролем, ценообразование обеспечивает целевую доходность</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Зам. ГД по финансам и экономике → прямое подчинение ГД</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2px">
+    
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f4fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Заместитель ГД по финансам и экономике</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Прямое подчинение ГД · Финансы · Бухгалтерия · Ценообразование</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8eef8;color:#1e2d4a;white-space:nowrap;flex-shrink:0">Рук. группы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Управляемая финансовая система: ГД в любой момент видит достоверную экономику компании, бюджет всех групп под контролем, отчётность сдаётся без ошибок и в срок, ценообразование обеспечивает целевую доходность</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Финансовое планирование: бюджет на год с разбивкой по кварталам и месяцам, плановые показатели для каждой функциональной группы · подготовка управленческой отчётности: P&L, CF, Balance Sheet в срок и без существенных отклонений · контроль отклонений факт/план: выявление причин, инициирование корректирующих мер · управление бухгалтерским блоком: главбух и бухгалтеры · разработка и методологическое сопровождение системы мотивации: формулы, коэффициенты, расчёты · ведение финансового комитета: повестка, данные, протокол · финансовый анализ для управленческих решений по запросу ГД · управление специалистом по ценообразованию · контроль налоговых рисков</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f4fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Специалист по ценообразованию</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по финансам · Кросс-функциональная роль</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8eef8;color:#1e2d4a;white-space:nowrap;flex-shrink:0">Финансы</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Актуальные цены по всем каналам и SKU, обеспечивающие целевую доходность без потери конкурентоспособности</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Расчёт и актуализация рекомендованных розничных цен (РРЦ) по всем продуктам · построение ценовых матриц по каналам: e-com, опт, тендер, маркетплейсы · расчёт себестоимости по SKU с учётом закупочных цен, логистики и таможенных расходов · мониторинг рыночных цен конкурентов и оперативная корректировка · контроль доходности: маржинальность каждого канала и категории · разработка и экономическая оценка промо-механик и акций · взаимодействие с коммерцией по ценовой политике каналов · взаимодействие с закупками по влиянию закупочных цен на доходность</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f4fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Главный бухгалтер</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Зам. ГД по финансам · Управляет бухгалтерами</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8eef8;color:#1e2d4a;white-space:nowrap;flex-shrink:0">Бухгалтерия</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Бухгалтерская и налоговая отчётность сдана без существенных ошибок, в срок, без штрафов и претензий от контролирующих органов</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Организация и контроль ведения бухгалтерского учёта в полном соответствии с законодательством · формирование и сдача налоговой отчётности: НДС, налог на прибыль, НДФЛ, взносы · взаимодействие с налоговыми органами и другими контролирующими структурами · управление бухгалтерами: распределение участков, контроль качества · закрытие отчётного периода: проверка проводок, сверки, подготовка отчётности · внутренний контроль за корректностью первичных документов · консультирование руководителей по вопросам налогообложения операций</p></div>
+    </div>
+  </div>
+  <div style="background:#fff;overflow:hidden">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#f0f4fb">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.3">Бухгалтер ×2</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Подчинение Главному бухгалтеру</div>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;background:#e8eef8;color:#1e2d4a;white-space:nowrap;flex-shrink:0">Бухгалтерия</span>
+    </div>
+    <div style="padding:0 20px 18px;display:flex;flex-direction:column;gap:11px">
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 5px">ЦКП роли</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Операции по закреплённому участку учёта отражены корректно, первичные документы оформлены без ошибок, периоды закрыты в срок</p></div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div><div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Функции</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8">Ведение закреплённого участка бухгалтерского учёта: банк, касса, расчёты с поставщиками, расчёты с покупателями, зарплата — в зависимости от распределения · приём, проверка и обработка первичной документации · формирование проводок и проверка их корректности · проведение сверок с контрагентами · подготовка данных для закрытия отчётного периода · участие в инвентаризациях · подготовка документов по запросам налоговых органов</p></div>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- COMMITTEES -->
+<div id="s-committees" class="sec">
+<div class="wrap">
+  <div class="sh">
+    <div class="sh-eye">04 &mdash; Комитеты</div>
+    <h2 class="sh-title">Четыре комитета &mdash; второй слой управления</h2>
+    <p class="sh-desc">Комитет &mdash; не уровень иерархии, а периодическая рабочая группа для решений на стыке нескольких функциональных групп. У каждого один сквозной показатель, которого ни одна группа не достигает в одиночку.</p>
+  </div>
+  <div class="cg">
+
+    <!-- COMMERCIAL COMMITTEE -->
+    <div class="cc">
+      <div class="cc-head che"><h2>Коммерческий комитет</h2><div class="cs">2 раза в месяц &middot; председатель &mdash; ГД</div></div>
+      <div class="cc-body">
+        <div class="cs-block"><h4>Участники</h4><div class="cmb">
+          <span class="cmm">ГД (председатель)</span>
+          <span class="cmm">РОП E-com</span>
+          <span class="cmm">РОП (дилеры, дистрибьюторы)</span>
+          <span class="cmm">РОП тендерного отдела (B2G)</span>
+          <span class="cmm">Зам. ГД по развитию бизнеса</span>
+        </div></div>
+        <div class="cs-block"><h4>Командные показатели</h4>
+          <div class="cmet"><div class="ml">Конверсия входящего потока в выручку</div><div class="md">Все обращения по всем цифровым точкам входа &rarr; закрытые сделки. Без трафика от Развития &mdash; мало лидов. Без квалификации e-com &mdash; потери на входе. Без правильной маршрутизации &mdash; B2B не разрабатывается в опте.</div></div>
+          <div class="cmet"><div class="ml">Общее выполнение плана по всем каналам</div><div class="md">Суммарный план e-com + опт + тендер. Ни один канал не выполнит его в одиночку. Оба РОП заинтересованы в результате друг друга &mdash; общий бонус только если выполнен общий план.</div></div>
+        </div>
+        <div class="cs-block"><h4>Постоянная повестка</h4><ul class="clist">
+          <li>Синхронизация акционной и ценовой политики между каналами</li>
+          <li>Разбор конфликтов по распределению клиентской базы e-com &harr; опт</li>
+          <li>Исполнение регламента передачи B2B-клиентов: разбор отклонений</li>
+          <li>Анализ воронки: где теряем лиды между каналами</li>
+          <li>Квартальное согласование коммерческих планов по каналам</li>
+        </ul></div>
+        <div class="cbonus"><div class="bp">20%</div><p>Командный бонус от переменной части каждого участника. Выплачивается ежеквартально при выполнении общего коммерческого плана и росте конверсии.</p></div>
+      </div>
+    </div>
+
+    <!-- ASSORTMENT COMMITTEE -->
+    <div class="cc">
+      <div class="cc-head cha"><h2>Ассортиментный комитет</h2><div class="cs">1 раз в месяц &middot; ведёт Зам. ГД по развитию</div></div>
+      <div class="cc-body">
+        <div class="cs-block"><h4>Участники</h4><div class="cmb">
+          <span class="cmm">Зам. ГД по развитию (ведущий)</span>
+          <span class="cmm">Рук. отд. развития и кач. продукции</span>
+          <span class="cmm">Рук. по закупкам и ВЭД</span>
+          <span class="cmm">Рук. по закупкам и ВЭД</span>
+          <span class="cmm">РОП E-com</span>
+          <span class="cmm">РОП (дилеры, дистрибьюторы)</span>
+        </div></div>
+        <div class="cs-block"><h4>Роль комитета</h4>
+          <div class="cmet"><div class="ml">Коллегиальное управление ассортиментом</div><div class="md">Категорийный менеджер участвует и готовит аналитику по категориям. Решения по ассортименту принимаются с учётом продуктовой экспертизы Развития, логики закупок и реального спроса от обоих коммерческих каналов.</div></div>
+        </div>
+        <div class="cs-block"><h4>Командный показатель</h4>
+          <div class="cmet"><div class="ml">Доля активного ассортимента в выручке</div><div class="md">% SKU с продажами в квартале &times; маржинальность. Без Закупок &mdash; нет товара. Без Развития &mdash; нет понимания что продавать. Без E-com &mdash; нет видимости карточек. Без Опта &mdash; нет сигнала о спросе в регионах.</div></div>
+        </div>
+        <div class="cs-block"><h4>Постоянная повестка</h4><ul class="clist">
+          <li>Запуск новинок: что, когда, в каком объёме по каналам</li>
+          <li>Вывод неликвидных SKU: критерии и сроки</li>
+          <li>Приоритизация ассортимента по каналам (e-com vs опт)</li>
+          <li>% новинок от решения до полки в срок &mdash; разбор задержек</li>
+          <li>Анализ доходности: что растёт, что деградирует</li>
+        </ul></div>
+        <div class="cbonus"><div class="bp">20%</div><p>Командный бонус при росте доли активного ассортимента квартал к кварталу. Развитие разрабатывает &rarr; Закупки завозят &rarr; каналы продают.</p></div>
+      </div>
+    </div>
+
+    <!-- OPERATIONAL COMMITTEE -->
+    <div class="cc">
+      <div class="cc-head cho"><h2>Операционный комитет</h2><div class="cs">2 раза в месяц &middot; еженедельный дашборд SLA</div></div>
+      <div class="cc-body">
+        <div class="cs-block"><h4>Участники</h4><div class="cmb">
+          <span class="cmm">Рук. складского хранения и логистики</span>
+          <span class="cmm">Рук. сервисного обслуживания</span>
+          <span class="cmm">Руководитель IT</span>
+          <span class="cmm">Рук. по закупкам и ВЭД</span>
+          <span class="cmm">ГД (по необходимости)</span>
+        </div></div>
+        <div class="cs-block"><h4>Командный показатель</h4>
+          <div class="cmet"><div class="ml">% заказов без рекламации &mdash; от приёма до доставки</div><div class="md">Сквозной SLA: заказ принят &rarr; собран &rarr; отгружен &rarr; доставлен &rarr; клиент доволен. Склад &mdash; за сборку, IT &mdash; за бесперебойность систем, Сервис &mdash; за рекламации, Закупки &mdash; за наличие товара. Показатель общий &mdash; бонус общий.</div></div>
+        </div>
+        <div class="cs-block"><h4>Как работает без промежуточного уровня управления</h4><ul class="clist">
+          <li>Еженедельный дашборд сквозного SLA виден всем участникам</li>
+          <li>Если SLA падает &mdash; комитет разбирает где узкое место</li>
+          <li>Падение ниже 90% &rarr; публичный разбор с ГД</li>
+          <li>Общий бонус снимает желание перекладывать вину на соседей</li>
+        </ul></div>
+        <div class="cbonus"><div class="bp">20%</div><p>Командный бонус при достижении 98%+ заказов без рекламации. Ни один отдел не достигает этого без вклада остальных.</p></div>
+      </div>
+    </div>
+
+    <!-- FINANCIAL COMMITTEE -->
+    <div class="cc">
+      <div class="cc-head chb"><h2>Финансовый комитет</h2><div class="cs">1 раз в месяц &middot; председатель &mdash; ГД</div></div>
+      <div class="cc-body">
+        <div class="cs-block"><h4>Участники</h4><div class="cmb">
+          <span class="cmm">ГД (председатель)</span>
+          <span class="cmm">Зам. ГД по финансам и экономике (ведёт)</span>
+          <span class="cmm">Зам. ГД по работе с персоналом</span>
+          <span class="cmm">Зам. ГД по развитию бизнеса</span>
+          <span class="cmm">РОП E-com</span>
+          <span class="cmm">РОП (дилеры, дистрибьюторы)</span>
+          <span class="cmm">РОП тендерного отдела</span>
+          <span class="cmm">Рук. по закупкам и ВЭД</span>
+          <span class="cmm">Рук. складского хранения и логистики</span>
+          <span class="cmm">Рук. сервисного обслуживания</span>
+          <span class="cmm">Руководитель IT</span>
+        </div></div>
+        <div class="cs-block"><h4>Командный показатель</h4>
+          <div class="cmet"><div class="ml">Точность прогноза и выполнение бюджета &le;10% отклонения</div><div class="md">Отклонение факт/план не более 10% по каждому блоку. Дисциплинирует честно называть реалистичные цифры. Именно здесь ГД видит полную картину по всем 10 прямым подчинённым: обещали, сделали, планируют.</div></div>
+        </div>
+        <div class="cs-block"><h4>Постоянная повестка</h4><ul class="clist">
+          <li>Сверка план/факт по каждому блоку за месяц</li>
+          <li>Анализ причин отклонений &mdash; что пошло не так и почему</li>
+          <li>Согласование бюджетов на следующий месяц</li>
+          <li>Обновление прогноза на квартал по всем группам</li>
+          <li>Раз в квартал &mdash; письменная оценка ГД каждому руководителю</li>
+        </ul></div>
+        <div class="cbonus"><div class="bp">&pm;10%</div><p>Точность прогноза в диапазоне &pm;10% от факта &mdash; бонус к оценке. Выход за пределы &mdash; разбор причин на следующем заседании.</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- CADENCE -->
+<div id="s-cadence" class="sec">
+<div class="wrap">
+  <div class="sh">
+    <div class="sh-eye">05 &mdash; Регулярный менеджмент</div>
+    <h2 class="sh-title">Ритм управления компанией</h2>
+    <p class="sh-desc">Два слоя управления &mdash; два ритма. Функциональные группы: частый операционный контакт. Комитеты: плановые встречи для кросс-функциональных решений. Единый дашборд с показателями всех групп ведётся постоянно &mdash; каждый видит актуальные данные в любой момент.</p>
+  </div>
+  <div class="cad-w">
+    <div class="cad-row">
+      <div class="cad-col"><div class="cad-freq">Еженедельно</div><div class="cad-name">Внутри каждой группы</div><ul class="cad-list">
+        <li>Планёрка внутри группы (30 мин)</li>
+        <li>Обновление общего дашборда &mdash; все показатели видны всем</li>
+        <li>Синхронизация e-com &harr; опт по клиентским передачам</li>
+        <li>Разбор текущих блокеров</li>
+        <li>Дашборд SLA для операционных групп</li>
+      </ul></div>
+      <div class="cad-col"><div class="cad-freq">2&times; / мес</div><div class="cad-name">Коммерческий &amp; Операционный комитет</div><ul class="cad-list">
+        <li>Динамика сквозных показателей</li>
+        <li>Разбор конфликтов между группами</li>
+        <li>Синхронизация приоритетов</li>
+        <li>Протокол &mdash; задача / ответственный / срок &mdash; рассылка в 24 ч</li>
+      </ul></div>
+      <div class="cad-col"><div class="cad-freq">1&times; / мес</div><div class="cad-name">Фин. комитет &amp; Ассортиментный &amp; Отчёты ГД</div><ul class="cad-list">
+        <li>Каждый руководитель &mdash; письменный отчёт ГД</li>
+        <li>Шаблон: план / факт / что мешает / что нужно от кого</li>
+        <li>Финансовый комитет: план/факт, бюджет, прогноз</li>
+        <li>Ассортиментный комитет: новинки, ротация SKU</li>
+        <li>ГД корректирует приоритеты и даёт обратную связь</li>
+      </ul></div>
+      <div class="cad-col"><div class="cad-freq">1&times; / кварт.</div><div class="cad-name">Квартальные итоги</div><ul class="cad-list">
+        <li>Глубокая сверка план/факт по всем группам</li>
+        <li>Письменная оценка ГД каждому руководителю</li>
+        <li>Корректировка целевых показателей на след. квартал</li>
+        <li>Корректировка системы мотивации при необходимости</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="hdiv"></div>
+  <div class="sh"><div class="sh-eye">Что ГД получает от каждой группы</div>
+    <h2 class="sh-title">Ежемесячный отчёт: 10 групп + 4 комитета</h2>
+  </div>
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:28px;font-weight:300">Каждый из 10 прямых подчинённых ГД ежемесячно предоставляет письменный отчёт по единому шаблону: <strong style="color:var(--ink)">план / факт / что мешает / что нужно от кого.</strong></p>
+
+  <div style="margin-bottom:28px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink)">Функциональные группы</div>
+  <div class="rep-grid">
+
+    <div class="repcard">
+      <div class="rh" style="color:#7a4a3a">&#9632; Зам. ГД по работе с персоналом</div>
+      <div class="rw">HR-блок</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Укомплектованность</strong> &mdash; статус TO-BE структуры, критичные открытые вакансии</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Подбор</strong> &mdash; воронка кандидатов, срок закрытия, конверсия по этапам</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Текучесть и адаптация</strong> &mdash; ушедшие, причины, прошедшие испытательный срок</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Сигналы из команды</strong> &mdash; что требует внимания ГД</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#2e6b7a">&#9632; Зам. ГД по развитию бизнеса</div>
+      <div class="rw">Блок развития</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Трафик и CPL</strong> &mdash; входящий поток по каналам, стоимость лида, динамика</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Статус проектов</strong> &mdash; запущено / в процессе / заблокировано (и кем)</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Новинки</strong> &mdash; статус запуска, срок от решения до полки</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>NPS и обращения</strong> &mdash; клиентская обратная связь, системные проблемы</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#5a3a8a">&#9632; РОП тендерного отдела (B2G)</div>
+      <div class="rw">Тендерный канал</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Pipeline</strong> &mdash; активные заявки, суммы, вероятность, стадии</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Результат</strong> &mdash; поданные заявки, выигранные контракты, маржинальность</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Исполнение</strong> &mdash; статус действующих контрактов, риски</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Прогноз</strong> &mdash; ожидаемые результаты до конца квартала</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#b5813a">&#9632; РОП E-com</div>
+      <div class="rw">E-commerce канал</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Выручка и ВП</strong> &mdash; факт vs план, по каналам (сайт / маркетплейсы), динамика</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Воронка</strong> &mdash; лиды, конверсия по этапам, средний чек, потерянные обращения</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Маркетплейсы</strong> &mdash; выручка по площадкам, CTR, ACOS, out-of-stock</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Передачи в опт</strong> &mdash; сколько B2B-лидов передано, конверсия в сделки</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#6b3a5a">&#9632; РОП (дилеры, дистрибьюторы)</div>
+      <div class="rw">B2B / Опт канал</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Выручка и ВП по каналу</strong> &mdash; факт vs план, по регионам</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Клиентский портфель</strong> &mdash; активные партнёры, новые подключения, потери</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Дебиторская задолженность</strong> &mdash; динамика, просроченная, меры</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Региональный разрез</strong> &mdash; выполнение плана по каждому региону</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#4a5a6e">&#9632; Рук. по закупкам и ВЭД</div>
+      <div class="rw">Закупки / ВЭД</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Наличие товара</strong> &mdash; fill rate, дефицит по ключевым SKU</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Сроки поставок</strong> &mdash; выполнение плана поставок, задержки и причины</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Закупочная экономика</strong> &mdash; цены vs план, логистические издержки</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Ассортимент</strong> &mdash; статус новинок, работа с неликвидами</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#3d6b4a">&#9632; Рук. сервисного обслуживания</div>
+      <div class="rw">Сервисный блок</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Сервис SLA</strong> &mdash; % обращений в срок, повторные обращения, NPS</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Гарантийные случаи</strong> &mdash; количество, стоимость, причины, тренды</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Системные проблемы</strong> &mdash; типовые дефекты продукции, переданные в Развитие</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Риски</strong> &mdash; что требует решения ГД</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#3d6b4a">&#9632; Рук. складского хранения и логистики</div>
+      <div class="rw">Склад / Логистика</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>SLA отгрузок</strong> &mdash; % в срок, ошибки комплектации, динамика</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Производительность</strong> &mdash; на одного сотрудника, использование мощности</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Потери ТМЦ</strong> &mdash; фактические за период, причины</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Риски</strong> &mdash; что может сломаться в следующем месяце</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#3d6b4a">&#9632; Руководитель IT</div>
+      <div class="rw">IT-блок</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Аптайм систем</strong> &mdash; инциденты, время простоя, динамика</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>IT-задачи бизнеса</strong> &mdash; % выполненных в срок, что перенесено и почему</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Проекты автоматизации</strong> &mdash; статус, риски, зависимости</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Риски инфраструктуры</strong> &mdash; что требует решения или финансирования</p></div>
+    </div>
+
+    <div class="repcard">
+      <div class="rh" style="color:#4a5a6e">&#9632; Зам. ГД по финансам и экономике</div>
+      <div class="rw">Финансовый блок</div>
+      <div class="ritem"><div class="rdot"></div><p><strong>P&amp;L управленческий</strong> &mdash; выручка, ВП, EBITDA, отклонение факт/план</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Бюджет</strong> &mdash; выполнение по статьям, риски превышения</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Денежный поток</strong> &mdash; CF, прогноз ликвидности</p></div>
+      <div class="ritem"><div class="rdot"></div><p><strong>Тревожные сигналы</strong> &mdash; что требует решения ГД прямо сейчас</p></div>
+    </div>
+
+  </div>
+
+  <div class="hdiv"></div>
+  <div style="margin-bottom:28px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink)">Комитеты &mdash; что видит ГД</div>
+  <div class="comm-rep-grid">
+    <div class="crcard">
+      <div class="crh" style="color:#b5813a">&#9632; Коммерческий комитет</div>
+      <div class="crw" style="color:#b5813a">2&times; в месяц</div>
+      <div class="md">Конверсия входящего потока &mdash; динамика. Общее выполнение плана e-com + опт + тендер. Протокол разбора конфликтов по клиентской базе. Прогноз выполнения квартала.</div>
+    </div>
+    <div class="crcard">
+      <div class="crh" style="color:#2e6b7a">&#9632; Ассортиментный комитет</div>
+      <div class="crw" style="color:#2e6b7a">1&times; в месяц</div>
+      <div class="md">Доля активного ассортимента в выручке &mdash; динамика. Решения по запуску новинок и выводу неликвидов. % новинок от решения до полки в срок. Прогноз по ассортименту.</div>
+    </div>
+    <div class="crcard">
+      <div class="crh" style="color:#4a5a6e">&#9632; Операционный комитет</div>
+      <div class="crw" style="color:#4a5a6e">2&times; в месяц</div>
+      <div class="md">Сквозной SLA &mdash; % заказов без рекламации, динамика. Где узкое место в цепочке. Инциденты, приведшие к сбоям. Протокол с ответственными.</div>
+    </div>
+    <div class="crcard">
+      <div class="crh" style="color:#8a7a5a">&#9632; Финансовый комитет</div>
+      <div class="crw" style="color:#8a7a5a">1&times; в месяц</div>
+      <div class="md">Бюджет план/факт по каждому из 10 блоков. Прогноз на квартал. Согласованный бюджет на следующий месяц. Раз в квартал &mdash; письменная оценка каждого руководителя.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const S=['logic','structure','roles','committees','cadence'];
+function scrollToGroup(gid){
+  setTimeout(function(){
+    var el = document.getElementById('grp-'+gid);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 100);
+}
+function show(id){
+  S.forEach(s=>document.getElementById('s-'+s).classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  const i=S.indexOf(id);
+  if(i>=0)document.querySelectorAll('.nb')[i].classList.add('on');
+  window.scrollTo({top:document.querySelector('nav').offsetTop,behavior:'smooth'});
+}
+function filt(g){
+  show('roles');
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  if(g==='all'){document.querySelectorAll('.fb')[0].classList.add('on');}
+  else{const m={ecom:'fecom',opt:'fopt',dev:'fdev',ops:'fops',fin:'ffin',hr:'fhr'};const el=document.querySelector('.'+m[g]);if(el)el.classList.add('on');}
+  document.querySelectorAll('.rc').forEach(c=>{c.classList.toggle('vis',g==='all'||c.dataset.g===g);});
+}
+</script>
+</body></html>
